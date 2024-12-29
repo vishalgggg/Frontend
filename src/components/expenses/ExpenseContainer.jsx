@@ -42,6 +42,7 @@ const ExpenseContainer = () => {
   useEffect(() => {
     (async () => {
       try {
+        console.log("refresh")
         await Promise.all([
           dispatch(getExpensesAction(rowsPerPage, page)),
           dispatch(getDownloadedExpensesAction()),
@@ -111,18 +112,23 @@ const ExpenseContainer = () => {
         />
       </div>
 
-      {expenses.map((values) => {
-        return (
-          <Expense
-            key={values.id}
-            name={values.name}
-            id={values.id}
-            price={values.price}
-            category={values.category}
-            date={values.date}
-          />
-        );
-      })}
+      {expensesLength > 0 ? (
+     expenses.map((values) => {
+     return (
+      <Expense
+        key={values.id}
+        name={values.name}
+        id={values.id}
+        price={values.price}
+        category={values.category}
+        date={values.date}
+      />
+      );
+     })
+      ) : (
+     <p>No expenses to display.</p>
+      )}
+
       {isPremiumUser && (
         <div>
           <button onClick={showLeaderboardHandeler}>Show LeaderBoard</button>
@@ -146,7 +152,7 @@ const ExpenseContainer = () => {
         ) }
       </div>
 
-      <div className=" flex flex-col gap-2">
+      {/* <div className=" flex flex-col gap-2">
         <h1 className=" text-center pb-4">Previous Download Reports</h1>
         {downloadLinks.map((link) => {
           return (
@@ -166,7 +172,7 @@ const ExpenseContainer = () => {
             </div>
           );
         }) }
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -30,7 +30,8 @@ export const getExpensesAction = (rowsperpage, page) => {
     return async (dispatch) => {
         try {
             const token = localStorage.getItem('token')
-            const { data } = await axios.get(`user/getexpenses?rowsperpage=${rowsperpage}&page=${page + 1}`, { headers: { token: token } })
+            const { data } = await axios.get(`http://localhost:4000/user/getexpenses?rowsperpage=${rowsperpage}&page=${page + 1}`, { headers: { token: token } })
+            console.log("data",data)
             if (data) {
                 dispatch(setExpenses({ expenses: data.expenses, expensesLength: data.expensesLength }))
                 if (data.isPremiumUser) {
