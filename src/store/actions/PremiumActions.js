@@ -8,6 +8,7 @@ import {
 } from "../../api/agent";
 
 
+
 import axios from "axios";
 
 export const buyPremiumAction = (token) => {
@@ -28,22 +29,22 @@ export const buyPremiumAction = (token) => {
                 appId: data.app_id, // Assuming your backend returns app_id
             };
 
-            Cashfree.init(options);
+            // Ensure that the Cashfree SDK script is loaded and available
+            if (!window.Cashfree) {
+                console.error("Cashfree SDK not loaded.");
+                return;
+            }
 
-            const cfInstance = new Cashfree({
-                mode: 'PROD' // Use 'TEST' for testing purposes
-            });
-
-            cfInstance.paySeamlessCheckout({
-                token: options.orderToken,
-                orderId: options.orderId,
-                onPaymentSuccess: async (response) => {
+            // Use the Cashfree SDK to initiate the payment
+            window.Cashfree.paySeamless({
+                orderToken: options.orderToken,
+                onSuccess: async (data) => {
                     try {
                         await axios.post(
                             UPDATE_PREMIUM_ENDPOINT,
                             {
                                 order_id: options.orderId,
-                                payment_id: response.transactionId,
+                                payment_id: data.transaction.transactionId, // Ensure to use the correct field from the response
                             },
                             { headers: { token: token } }
                         );
@@ -53,7 +54,7 @@ export const buyPremiumAction = (token) => {
                         console.log(error);
                     }
                 },
-                onPaymentFailure: async (response) => {
+                onFailure: async (data) => {
                     try {
                         await axios.post(UPDATE_STATUS_FAILED, { order_id: options.orderId }, { headers: { token: token } });
                         alert("Payment failed. Please try again.");
@@ -68,8 +69,6 @@ export const buyPremiumAction = (token) => {
         }
     }
 }
-
-
 
 
 
