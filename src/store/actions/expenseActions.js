@@ -52,7 +52,7 @@ export const deleteExpenseAction = (id) => {
     return async (dispatch, getState) => {
         try {
             const token = localStorage.getItem('token')
-            const { data } = await axios.delete(DELETE_EXPENSE_ENDPOINT, { data: { id: id }, headers: { token: token } })
+            const { data } = await axios.delete(DELETE_EXPENSE_ENDPOINT, { data: { id: id }, headers: { token: token } } )
             if (data) {
                 const allExpenses = getState().expenses.expenses
                 const { expensesLength } = getState().expenses

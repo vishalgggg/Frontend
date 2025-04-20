@@ -14,6 +14,7 @@ export const loginAction = () => {
 export const logOutAction = () => {
     return (dispatchEvent) => {
         dispatchEvent(setUserLogOut())
+        window.location.reload();
     }
 }
 

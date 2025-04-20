@@ -10,60 +10,44 @@ import {
 
 
 import axios from "axios";
+import { load } from "@cashfreepayments/cashfree-js";
 
 export const buyPremiumAction = (token) => {
     return async (dispatch) => {
         try {
             const { data } = await axios.post(BUY_PREMIUM_ENDPOINT, {}, { headers: { token: token } });
-
-            const options = {
-                orderToken: data.order_token, // Assuming your backend returns order_token
-                orderId: data.order.id,       // Assuming your backend returns order.id
-                customerDetails: {
-                    customerName: data.customer_name,
-                    customerEmail: data.customer_email,
-                    customerPhone: data.customer_phone
-                },
-                notifyUrl: 'https://your-notify-url.com', // Set your notify URL here
-                returnUrl: 'https://your-return-url.com', // Set your return URL here
-                appId: data.app_id, // Assuming your backend returns app_id
-            };
-
-            // Ensure that the Cashfree SDK script is loaded and available
-            if (!window.Cashfree) {
-                console.error("Cashfree SDK not loaded.");
-                return;
+            const orderId = data.order_id; // Assuming your backend returns orderId
+            
+            let cashfree;
+                
+            cashfree = await load({
+                    mode: "sandbox"
+                });
+            
+            let checkoutOptions = {
+                    paymentSessionId: data.order_token,
+                    redirectTarget: "_modal",
+                };
+            const result = await cashfree.checkout(checkoutOptions);
+           if(result.error){
+            console.log("close popup");
+            console.log(result.error);
+           }
+           if(result.redirect){
+            console.log("redirected");
+           }
+           if(result.paymentDetails){
+            console.log("completed");
+            console.log(result.paymentDetails.paymentMessage);
+            const response = await axios.get(`http://localhost:4000/payment/updatepremiumstatus/${orderId}`, { headers: { token: token } });
+            console.log(response)
+            console.log("response", response.data);
+            if(response.data.status){
+            dispatch(setIsPremium());
+            alert("You are now a premium member");
             }
-
-            // Use the Cashfree SDK to initiate the payment
-            window.Cashfree.paySeamless({
-                orderToken: options.orderToken,
-                onSuccess: async (data) => {
-                    try {
-                        await axios.post(
-                            UPDATE_PREMIUM_ENDPOINT,
-                            {
-                                order_id: options.orderId,
-                                payment_id: data.transaction.transactionId, // Ensure to use the correct field from the response
-                            },
-                            { headers: { token: token } }
-                        );
-                        dispatch(setIsPremium());
-                        alert("You are now a premium member");
-                    } catch (error) {
-                        console.log(error);
-                    }
-                },
-                onFailure: async (data) => {
-                    try {
-                        await axios.post(UPDATE_STATUS_FAILED, { order_id: options.orderId }, { headers: { token: token } });
-                        alert("Payment failed. Please try again.");
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
-            });
-
+           }
+            
         } catch (error) {
             console.log(error);
         }
@@ -75,7 +59,7 @@ export const buyPremiumAction = (token) => {
 export const getLeaderBoardAction = () => {
     return async (dispatch, getState) => {
         try {
-            const { data } = await axios.get('premium/getleaderboard')
+            const { data } = await axios.get('http://localhost:4000/premium/getleaderboard')
             dispatch(setLeaderBoard(data))
         } catch (error) {
             console.log(error)

@@ -20,6 +20,7 @@ const ExpenseContainer = () => {
   const navigate = useNavigate();
   const [showLeaderboard, setShowLeaderBoard] = useState(false);
   const { expenses, expensesLength } = useSelector((state) => state.expenses);
+  
   const { isPremiumUser, leaderBoard, downloadLinks } = useSelector(
     (state) => state.premium
   );
@@ -50,7 +51,7 @@ const ExpenseContainer = () => {
       } catch (error) {
         console.log(error);
       }
-    })();
+    }) ();
   }, [page, rowsPerPage]);
 
   // when user want to buy premium
@@ -129,7 +130,9 @@ const ExpenseContainer = () => {
      <p>No expenses to display.</p>
       )}
 
-      {isPremiumUser && (
+      {
+       
+      isPremiumUser && (
         <div>
           <button onClick={showLeaderboardHandeler}>Show LeaderBoard</button>
           {showLeaderboard &&
@@ -143,7 +146,7 @@ const ExpenseContainer = () => {
               );
             })}
         </div>
-      )}
+      ) }
       <div>
         {isPremiumUser && (
           <button onClick={downlaodExpenseHandeler}>
